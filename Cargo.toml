@@ -1,0 +1,11 @@
+[workspace]
+members = ["lib-client"]
+
+[package]
+name = "spreadsheet-metal"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+xml = "0.8.20"
+zip = "2.5.0"
