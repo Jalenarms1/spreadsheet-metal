@@ -82,7 +82,7 @@ pub fn read_rows(xml_data: &[u8], sst: &Vec<String>) -> Vec<Vec<CellValue>> {
                         CellValue::Text(ref s) => {
                             let parsed_v: usize = val.parse().expect(&format!("{}", val).to_string());
                             let sstv = sst.get(parsed_v).expect("index not found");
-                            CellValue::Text(sstv.to_string())
+                            CellValue::Text(sstv.trim().to_string())
                         },
                         _ => {
                             let parsed_int: Result<i32, ParseIntError> = val.parse();

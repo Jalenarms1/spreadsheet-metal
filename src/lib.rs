@@ -5,12 +5,22 @@ mod xml_utils;
 
 
 #[derive(Debug, Clone)]
-enum CellValue {
+pub enum CellValue {
     Int(i32),
     Float(f64),
     Text(String),
     Bool(bool),
     None
+}
+
+impl CellValue {
+    pub fn as_str(&mut self) -> Option<&str> {
+        if let CellValue::Text(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -28,7 +38,7 @@ impl XmlSheetType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MetalFrame {
     pub columns: Vec<CellValue>,
     pub rows: Vec<Vec<CellValue>>,
@@ -37,7 +47,23 @@ pub struct MetalFrame {
 
 impl MetalFrame {
 
-    pub fn read_excel(path: &str, sheet: &str, column_row: i8) -> Self {
+    pub fn get_rows(&self) -> &Vec<Vec<CellValue>> {
+        return &self.rows
+    }
+
+    pub fn by_col(&mut self, col: &str) -> Vec<String> {
+        let val_vec = Vec::new();
+
+        let col_index = self.columns.iter_mut().position(|c| c.as_str().expect("val not unwrapped") == col).expect("column not found");
+
+        println!("{col_index}");
+
+        return val_vec;
+    }
+
+    pub fn read_excel(path: &str, sheet: &str, column_row: Option<usize>) -> Self {
+        let column_row = column_row.unwrap_or(0);
+
         let mut mf = Self { columns: Vec::new(), rows: Vec::new(), sst: Vec::new() };
 
         let file = File::open(path).expect("file not read");
@@ -55,7 +81,7 @@ impl MetalFrame {
                 }
             }
             Err(err) => {
-                
+                eprintln!("{}", err)
             }
         }
 
@@ -76,7 +102,6 @@ impl MetalFrame {
                 println!("{}", file.name());
 
                 if file.read_to_string(&mut file_contents).is_ok() {
-                    // println!("{file_contents}");
                 } 
 
             }
@@ -89,25 +114,15 @@ impl MetalFrame {
 
 
         if let (Some(sheet_data_index), Some(end_sheet_data_index)) = (file_contents.find("<sheetData>"), file_contents.find("</sheetData>")) {
-            // println!("{sheet_data_index}");
-            // println!("{end_sheet_data_index}");
             
             sheet_data = file_contents[sheet_data_index + "<sheetData>".len()..end_sheet_data_index].to_string();
             println!("{}", sheet_data);
         
             let rows = xml_utils::read_rows(sheet_data.as_bytes(), &mf.sst);
-            // println!("{:?}", rows);
             mf.rows = rows.clone();
-            let col_row = rows.get(0);
-            match col_row {
-                Some(row) => {
-                    mf.columns = row.clone();
-                }
-                None => {}
-            }
         }
 
-
+        mf.columns = mf.rows.get(column_row).expect("Header row not found").to_vec();
 
         return mf;
     }

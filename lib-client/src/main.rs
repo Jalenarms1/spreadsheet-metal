@@ -5,10 +5,11 @@ fn main() {
     let file2 = "/Users/jalenarms/Documents/excel-testing/xltest1.xlsx";
     let sheet_name = "sheet1";
 
+    let mut mf = MetalFrame::read_excel( file1, sheet_name, Some(0));
 
-    let mf = MetalFrame::read_excel( file1, sheet_name, 0);
 
-    println!("{:?}", mf);
+    println!("{:?}", mf.get_rows());
+    println!("{:?}", mf.by_col("Product"));
 }
 
 
